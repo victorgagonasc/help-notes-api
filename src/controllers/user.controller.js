@@ -35,7 +35,10 @@ exports.create = async (req, res) => {
 
     const user = new User(req.body);
     await user.save();
-    return res.status(HttpStatus.CREATED).send(user);
+    return res.status(HttpStatus.CREATED).send({
+      ...getToken(user._id),
+      username: user.username
+    });
   } catch (error) {
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
@@ -86,7 +89,6 @@ exports.login = async (req, res) => {
 }
 
 getToken = (id) => {
-  console.log(id);
   const expiresIn = 604800;
   let token = jwt.sign({
     id

@@ -19,5 +19,6 @@ app.use(compression());
 
 app.use(require('./src/routes/index.routes'));
 app.use(require('./src/routes/user.routes'));
+app.use(require('./src/routes/note.routes'));
 
 module.exports = app;

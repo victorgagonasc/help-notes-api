@@ -18,5 +18,6 @@ app.use(express.urlencoded({
 app.use(compression());
 
 app.use(require('./src/routes/index.routes'));
+app.use(require('./src/routes/user.routes'));
 
 module.exports = app;

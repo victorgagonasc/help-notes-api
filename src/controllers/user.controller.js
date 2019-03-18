@@ -1,21 +1,25 @@
-const User = require('../models/user.model')
+const User = require('../models/user.model');
 const HttpStatus = require('http-status-codes');
+const mongoose = require('mongoose');
 
 exports.getAll = async (req, res) => {
   try {
-    const users = await User.find().select('-password')
+    const users = await User.find();
     return res.status(HttpStatus.OK).send(users);
   } catch (error) {
-    throw boom.boomify(error)
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 }
 
 exports.getById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id))
+      return res.status(HttpStatus.BAD_REQUEST).send('INVALID_ID');
+
+    const user = await User.findById(req.params.id);
     return res.status(HttpStatus.OK).send(user);
   } catch (error) {
-    throw boom.boomify(error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 }
 
@@ -23,36 +27,40 @@ exports.create = async (req, res) => {
   try {
     const result = await User.findOne({
       email: req.body.email
-    }).select('-password');
+    });
 
-    if (result) return res.send('User already exists');
+    if (result) return res.status(HttpStatus.CONFLICT).send('EMAIL_CONFLICT');
 
     const user = new User(req.body);
     await user.save();
-    delete user.password
     return res.status(HttpStatus.CREATED).send(user);
   } catch (error) {
-    return res.status(HttpStatus.CONFLICT).send(error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 }
 
 exports.update = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id))
+      return res.status(HttpStatus.BAD_REQUEST).send('INVALID_ID');
+
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true
-    }).select('-password');
-    console.log
+    });
     return res.status(HttpStatus.OK).send(user);
   } catch (error) {
-    throw boom.boomify(error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 }
 
 exports.delete = async (req, res) => {
   try {
-    const user = await User.findByIdAndRemove(req.params.id).select('-password');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id))
+      return res.status(HttpStatus.BAD_REQUEST).send('INVALID_ID');
+
+    const user = await User.findByIdAndRemove(req.params.id);
     return res.status(HttpStatus.ACCEPTED).send(user);
   } catch (error) {
-    throw boom.boomify(error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
   }
 }

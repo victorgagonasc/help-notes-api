@@ -1,12 +1,10 @@
-
 require('dotenv').config();
 require('./config/database');
 const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
-
-const indexRouter = require('./api/routes/index');
+const compression = require('compression');
 
 const app = express();
 
@@ -14,8 +12,11 @@ app.use(cors());
 app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({
+  extended: false
+}));
+app.use(compression());
 
-app.use('/', indexRouter);
+app.use(require('./src/routes/index.routes'));
 
 module.exports = app;
